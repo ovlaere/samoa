@@ -26,6 +26,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
+import com.google.common.collect.Tables;
 import com.yahoo.labs.samoa.instances.Instance;
 import com.yahoo.labs.samoa.instances.Instances;
 import com.yahoo.labs.samoa.moa.classifiers.core.attributeclassobservers.AttributeClassObserver;
@@ -75,6 +78,8 @@ public class NaiveBayes implements LocalLearner {
 	 * Track training instances seen.
 	 */
 	protected long instancesSeen = 0L;
+
+    public static final int CLASS_STATISTICS_FEATURE = Integer.MIN_VALUE;
 
 	/**
 	 * Explicit no-arg constructor.
@@ -225,5 +230,21 @@ public class NaiveBayes implements LocalLearner {
 	@Override
 	public void setDataset(Instances dataset) {
 		// Do nothing
+	}
+	
+	public Table<Integer, Integer, double[]> convertModelToTable() {
+        Table<Integer, Integer, double[]> result = HashBasedTable.create();
+        for (Integer classIndex : this.classInstances.keySet()) {
+            result.put(classIndex, CLASS_STATISTICS_FEATURE, new double[]{this.classInstances.get(classIndex)});
+            for (Integer attributeID : this.attributeObservers.keySet()) {
+                GaussianEstimator estimator = this.attributeObservers.get(attributeID).getEstimator(classIndex);
+                double[] parameters = new double[3];
+                parameters[0] = estimator.getTotalWeightObserved();
+                parameters[1] = estimator.getMean();
+                parameters[2] = estimator.getVariance();
+                result.put(classIndex, attributeID, parameters);
+            }
+        }
+        return result;
 	}
 }

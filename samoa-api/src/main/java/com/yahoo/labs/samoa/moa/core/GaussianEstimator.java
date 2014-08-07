@@ -41,6 +41,16 @@ public class GaussianEstimator extends AbstractMOAObject {
 
     public static final double NORMAL_CONSTANT = Math.sqrt(2 * Math.PI);
 
+    public GaussianEstimator() {
+        this(0, 0, 0);
+    }
+
+    public GaussianEstimator(double weightSum, double mean, double varianceSum) {
+        this.weightSum = weightSum;
+        this.mean = mean;
+        this.varianceSum = varianceSum;
+    }
+    
     public void addObservation(double value, double weight) {
         if (Double.isInfinite(value) || Double.isNaN(value)) {
             return;
