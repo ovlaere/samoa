@@ -232,6 +232,19 @@ public class NaiveBayes implements LocalLearner {
 		// Do nothing
 	}
 	
+	/**
+	 * Convert the entire NB model to a table, indexed by classIndex (subsequent integers according
+	 * to this NB implementation), attributeID and then a triplet of weight, mean and variance that
+	 * is included in the Gaussian estimator.
+	 * 
+	 * Please note that the getVariance method of the estimator returns the varianceSum value divided by 
+	 * (weightSum - 1.0), so if we want to obtain exactly the same values in order to reconstruct
+	 * the model in another place, we need to multiply the retrieved variance by this divisor. 
+	 * 
+	 * @return The entire NB model as a table, indexed by classIndex (subsequent integers according
+	 * to this NB implementation), attributeID and then a triplet of weight, mean and variance, which
+	 * can just be plugged into an estimator constructor to reconstruct.
+	 */
 	public Table<Integer, Integer, double[]> convertModelToTable() {
         Table<Integer, Integer, double[]> result = HashBasedTable.create();
         for (Integer classIndex : this.classInstances.keySet()) {
@@ -243,6 +256,10 @@ public class NaiveBayes implements LocalLearner {
 	                parameters[0] = estimator.getTotalWeightObserved();
 	                parameters[1] = estimator.getMean();
 	                parameters[2] = estimator.getVariance();
+	                // See getVariance method of estimator. The returned variance is
+	                // divided by the (weightSum - 1.0), so we want to restore that value
+	                if (parameters[2] > 0)
+	                	parameters[2] *= (parameters[0] - 1.0);
 	                result.put(classIndex, attributeID, parameters);
                 }
             }
