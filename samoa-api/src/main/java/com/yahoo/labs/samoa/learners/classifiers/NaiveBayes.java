@@ -121,6 +121,8 @@ public class NaiveBayes implements LocalLearner {
 			votes[classIndex] = Math.log(getPrior(classIndex));
 			// Get mass for the class
 			Double classMass = this.classInstances.get(classIndex);
+			if (classMass == null)
+				classMass = 0.;
 			for (Integer attributeID : attributeObservers.keySet()) { 
 				// Skip class attribute
 				if (attributeID == inst.classIndex())
